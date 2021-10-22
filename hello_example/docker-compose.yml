@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+
+    web_content_01:
+        image: wordpress:${WORDPRESS_VERSION}
+        container_name: web_content_01
+        restart: always
+        ports:
+            - 8090:80
+        environment:
+            WORDPRESS_DB_HOST: web_content_db_01
+            WORDPRESS_DB_NAME: web_content_01
+            WORDPRESS_TABLE_PREFIX: wp_
+            WORDPRESS_DB_USER: ${USER}
+            WORDPRESS_DB_PASSWORD: ${PASSWORD}
+        volumes:
+            - web_content_01:/var/www/html
+        depends_on:
+            - web_content_db_01
+
+    web_content_db_01:
+        image: mariadb:${MARIADB_VERSION}
+        container_name: web_content_db_01
+        restart: always
+        ports:
+            - 3306:3306
+        environment:
+            MARIADB_DATABASE: web_content_01
+            MARIADB_USER: ${USER}
+            MARIADB_PASSWORD: ${PASSWORD}
+            MARIADB_ROOT_PASSWORD: ${PASSWORD}
+        volumes:
+            - web_content_db_01:/var/lib/mysql
+
+volumes:
+    web_content_01:
+    web_content_db_01:
+
+networks:
+    app_net:
+        name: application_network
+        ipam:
+            driver: default
+            config:
+                - subnet: "172.16.0.0/24"
